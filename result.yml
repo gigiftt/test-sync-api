@@ -1,0 +1,1169 @@
+openapi: 3.0.0
+info:
+  title: Authenticaion Service
+  version: 1.0.0
+servers:
+  - url: https://dev-authentication.q-chang.io
+components:
+  securitySchemes:
+    noauthAuth:
+      type: http
+      scheme: noauth
+    bearerAuth:
+      type: http
+      scheme: bearer
+    apikeyAuth:
+      type: apiKey
+      in: header
+      name: apiKey
+      # scheme: apiKey
+tags:
+  - name: Refresh Token
+  - name: Verify Token
+  - name: Signin
+  - name: Status
+  - name: User Authen
+  - name: Revoke Token
+paths:
+  /token/refresh:
+    post:
+      tags:
+        - Refresh Token
+      summary: Refresh Token
+      description: '##### \- No JWTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+              example:
+                refresh_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzE0MjM3MDUsImlhdCI6MTY3MDgxODkwNSwidXNlclVVSUQiOiJiNmM0MjNlNy0zZGZiLTNmMmItOGQ5Yy02NzFiNTQ2YmI1YTgiLCJ1c2VyVHlwZSI6ImFkbSIsInNlc3Npb25VVUlEIjoiNjY4ODkwMzUtNWNhYS0zN2E4LWE3NmEtNDU0ZWMwNWRmMWUwIn0.xPfZeDDXm24BlG4erPjuxXPLOjAVNy2Ew6o7seeqUPE
+      # security:
+      #   - noauthAuth: []
+      responses:
+        "200":
+          description: 200 OK
+          headers:
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            vary:
+              schema:
+                type: string
+                example: Origin
+            date:
+              schema:
+                type: string
+                example: Thu, 27 Jan 2022 06:41:01 GMT
+            content-length:
+              schema:
+                type: integer
+                example: "596"
+            x-envoy-upstream-service-time:
+              schema:
+                type: integer
+                example: "2"
+            server:
+              schema:
+                type: string
+                example: istio-envoy
+            Via:
+              schema:
+                type: string
+                example: 1.1 google
+            Alt-Svc:
+              schema:
+                type: string
+                example: clear
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    description: access_token
+                    type: string
+                  refresh_token:
+                    description: refresh_token
+                    type: string
+              example:
+                access_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDMzNTIwNjEsImlhdCI6MTY0MzI2NTY2MSwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSIsImNvbnRlbnQiOnsiY2hhbm5lbFVVSUQiOiJiNTEyZmNkMC0xNDQyLTNhMTktYTRmOC0xOTIwZDMwYjg1NzgiLCJzdG9yZVVVSUQiOiIiLCJyb2xlIjpudWxsfX0.7et_V97CDa_Y2U2nmo_bBGi3ClPlLRGn6gARarWkJHg
+                refresh_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDM4NzA0NjEsImlhdCI6MTY0MzI2NTY2MSwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSJ9.mK8aaaehLOK0wYWKfA953o_ylzg3lJJbGZNtEaiM-iU
+  /token/firebase/verify/{userType}:
+    post:
+      tags:
+        - Verify Token
+      summary: Firebase
+      description: |-
+        ##### Use JWT Channel (Api key)
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | token_id | true | token from login firebase |
+        | fcmToken | false | Firebase cloud messaging token (for userType ctr) |
+
+        ##### userType
+
+        - cus = customer
+        - ctr = contractor
+        - adm = admin portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token_id
+              properties:
+                token_id:
+                  type: string
+              example:
+                token_id: >-
+                  eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk3OWVkMTU1OTdhYjM1Zjc4MjljZTc0NDMwN2I3OTNiN2ViZWIyZjAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmlyLXNpdC1mOGVkNyIsImF1ZCI6ImZpci1zaXQtZjhlZDciLCJhdXRoX3RpbWUiOjE2Nzk3NDMwOTksInVzZXJfaWQiOiJNeDhncm41ajRFZTJlUFkySTg4QTlnNDNGT24yIiwic3ViIjoiTXg4Z3JuNWo0RWUyZVBZMkk4OEE5ZzQzRk9uMiIsImlhdCI6MTY3OTc0MzEwMCwiZXhwIjoxNjc5NzQ2NzAwLCJlbWFpbCI6InRlc3RhZG1pbkB0ZXN0LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJ0ZXN0YWRtaW5AdGVzdC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.NnnUbOx00_F0s2sZyvwzftelfD6jo4Ffnlsyhk0gJq4V7VTrfvI4vPuVbkeh0gclRWhT0eHjWr4l3TRedN3V6aeHy6hRo6JFiC-Q3XTIZLBkhbLl5c739rI5jyzSvIuUllsIXp8MuA4er-7JQiTTARLnw1pzMfclHlE46UEYuzy9fxjbkwpTi8q369u-ga8LlbTbLlWTBqNk_0F16plmFUb5_P96M3JkJj3NFfBbRa4vRsaNO3dv6HtvH8H8N1GloTRQyzCfBw9fm35up-0_FLd7DemtwCK_9UpzN8a1VYnzJq1zCEh9oq6TzWmR0G_2X6lml2y5xfRbzA_gEZhkKQ
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userType
+          in: path
+          description: cus = customer, ctr = contractor, adm = admin portal
+          schema:
+            type: string
+            enum: [cus, ctr, adm]
+            default: adm
+          required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            Vary:
+              schema:
+                type: string
+                example: Origin
+            Date:
+              schema:
+                type: string
+                example: Tue, 10 Aug 2021 17:57:00 GMT
+            Content-Length:
+              schema:
+                type: integer
+                example: "1091"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+              example:
+                access_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mjg2MTkxMjAsImlhdCI6MTYyODYxODIyMCwidXNlcldpdGhQZXJtaXNzaW9uIjp7InVzZXJVVUlEIjoiMDNkZGZkZjItYzIyZS0zOTI3LWIyNjgtYWZmMGEyYjVkNDFhIiwiZmlyc3ROYW1lIjoiIiwibGFzdE5hbWUiOiIiLCJjaGFubmVsIjp7ImNoYW5uZWxVVUlEIjoiIiwiY2hhbm5lbE5hbWUiOiIiLCJzdG9yZSI6eyJzdG9yZVVVSUQiOiIiLCJzdG9yZU5hbWUiOiIifX0sInJvbGUiOnsicm9sZVVVSUQiOiI4NDNmOGJmNy1hNDc3LTNhMjgtYTA2Yi0zM2RmNmQ4OGRjYmEiLCJyb2xlTmFtZSI6IkRFRkFVTFRfQ1VTIiwicGVybWlzc2lvbnMiOlt7Im1lbnVOYW1lIjoidGVzdF9tZW51MSIsInNjb3BlIjp7InZpZXciOnRydWUsImNyZWF0ZSI6dHJ1ZSwidXBkYXRlIjpmYWxzZSwiZGVsZXRlIjpmYWxzZSwiZXhwb3J0IjpmYWxzZX19LHsibWVudU5hbWUiOiLguKrguKPguLjguJvguKPguLLguKLguIHguLLguKPguIjguYjguLLguKLguYDguIfguLTguJkiLCJzY29wZSI6eyJ2aWV3Ijp0cnVlLCJjcmVhdGUiOnRydWUsInVwZGF0ZSI6dHJ1ZSwiZGVsZXRlIjp0cnVlLCJleHBvcnQiOnRydWV9fV19fX0.1zDZ1i4SFgVc0WcE6M7xFw9sHAn5e44p_eUI910d0Qo
+                refresh_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mjg3MDQ2MjAsImlhdCI6MTYyODYxODIyMCwidXNlclJvbGVVVUlEIjoiMDNkZGZkZjItYzIyZS0zOTI3LWIyNjgtYWZmMGEyYjVkNDFhIn0.Xr7tdm3T3QNHjlQVK9NS4Z0EEs7P05oZBNmpTVpVmGQ
+        "400":
+          description: Bad Request
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            Vary:
+              schema:
+                type: string
+                example: Origin
+            Date:
+              schema:
+                type: string
+                example: Tue, 10 Aug 2021 17:57:53 GMT
+            Content-Length:
+              schema:
+                type: integer
+                example: "48"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                example-0:
+                  summary: token expired
+                  value:
+                    errorCode: AU001
+                    errorMessage: "ID token has expired at: 1628582796"
+                example-1:
+                  summary: token invalid
+                  value:
+                    error: >-
+                      invalid character '|' after object key:value pair; see
+                      https://firebase.google.com/docs/auth/admin/verify-id-tokens
+                      for details on how to retrieve a valid ID token
+  /token/firebase/verify/ctr/migrate:
+    post:
+      tags:
+        - Verify Token
+      summary: Firebase Migrate Contractor
+      description: |-
+        ##### Use JWT Channel (Api key)
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | token_id | true | token from login firebase |
+        | user_uuid | true | user UUID from get existing |
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token_id
+                - user_uuid
+                - registrationToken
+              properties:
+                token_id:
+                  description: token from login firebase
+                  type: string
+                user_uuid:
+                  description: user UUID from get existing
+                  type: string
+                registrationToken:
+                  type: string
+              example:
+                token_id: >-
+                  eyJhbGciOiJSUzI1NiIsImtpZCI6ImYxZDU2YTI1MWU0ZGRhM2Y0NWM0MWZkNWQ0ZGEwMWQyYjlkNzJlMGQiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmlyLXNpdC1mOGVkNyIsImF1ZCI6ImZpci1zaXQtZjhlZDciLCJhdXRoX3RpbWUiOjE2NDc0MjA0NDQsInVzZXJfaWQiOiJvd3FYYXdtYUJ1V3llVWh2OWJwYXVsVzZ4cXkxIiwic3ViIjoib3dxWGF3bWFCdVd5ZVVodjlicGF1bFc2eHF5MSIsImlhdCI6MTY0NzQyMDQ0NCwiZXhwIjoxNjQ3NDI0MDQ0LCJlbWFpbCI6InRlc3RtaWdyYXRlQHRlc3QuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInRlc3RtaWdyYXRlQHRlc3QuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.QLmjdetmBugnYjIj2CnjJvA7pmxkKTw8JjfbW_xqgUeCLunry-wms2wlRvdtBjQRyta-YUyymNFYoZ8L1i2lgzMguIzoyWdwqHqQT3uPh1w6CU9nvembPRXu6QwdgLgfmC7_QQ7dx4DGy0pIFvigMQdZgmVgjWDyDmPpazc1BJLC2mGdSKPp798e4HlCgVFSks7LqwK2ToTcjaaU3C3bfa_I-z009M-GZQMShJyGp4FZXmGIV_I8yjxve3vUyN1sK-99eAE_tilnoKcT9S5cyujrefZLdMaLNXdrGYq6zJUmn0tQbgraERr8JzCKunFQTvN2GsfFe2GPT1Av-5ftiw
+                user_uuid: 5bda3377-dbce-35b7-aa63-541f346989b6
+                registrationToken: >-
+                  AAAAgTeGsjo:APA91bFzipD58nUCb97LYiXHYE9woo-wef5we64a5wef-56a4wef65aw6e54f65wasadfewasdfSSADWaasd
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            vary:
+              schema:
+                type: string
+                example: Origin
+            date:
+              schema:
+                type: string
+                example: Thu, 27 Jan 2022 06:41:01 GMT
+            content-length:
+              schema:
+                type: integer
+                example: "596"
+            x-envoy-upstream-service-time:
+              schema:
+                type: integer
+                example: "2"
+            server:
+              schema:
+                type: string
+                example: istio-envoy
+            Via:
+              schema:
+                type: string
+                example: 1.1 google
+            Alt-Svc:
+              schema:
+                type: string
+                example: clear
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+              example:
+                access_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDMzNTIwNjEsImlhdCI6MTY0MzI2NTY2MSwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSIsImNvbnRlbnQiOnsiY2hhbm5lbFVVSUQiOiJiNTEyZmNkMC0xNDQyLTNhMTktYTRmOC0xOTIwZDMwYjg1NzgiLCJzdG9yZVVVSUQiOiIiLCJyb2xlIjpudWxsfX0.7et_V97CDa_Y2U2nmo_bBGi3ClPlLRGn6gARarWkJHg
+                refresh_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDM4NzA0NjEsImlhdCI6MTY0MzI2NTY2MSwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSJ9.mK8aaaehLOK0wYWKfA953o_ylzg3lJJbGZNtEaiM-iU
+  /token/line/verify/{userType}:
+    post:
+      tags:
+        - Verify Token
+      summary: Line
+      description: |-
+        ##### Use JWT Channel (Api key)
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | token_id | true | id token from login line |
+        | access_token | true | access token from login line |
+
+        *use token_id or access_token for verify (require one)
+
+        ##### userType
+
+        *   cus = customer
+        *   ctr = contractor
+        *   adm = admin portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              oneOf:
+                - description: Use token id
+                  properties:
+                    token_id:
+                      description: id token from login line
+                      type: string
+                  required:
+                    - token_id
+                - description: Use access token
+                  properties:
+                    access_token:
+                      description: access token from login line
+                      type: string
+                  required:
+                    - access_token
+                  example:
+                    access_token: >-
+                      eyJhbGciOiJIUzI1NiJ9.S52AQ2PHUQekGGRJdiBG2iFWHb8nnHpx-juWc3v6Ytlxop_pk-OwXOvFitIQVkJfa0lQFHeNlylrERtSFH9iPTd4qVSYnQg5p209F1IUktLBcExqmEfhBE-zypOaVguY6f3QHSAb1_LeC9tTDkbfZkZm93IGn3-b1We-Lnqdi_4.B130sypCcKc8gfN34ZAGTKCD0v8Lyg9GWFnDRNoExGo
+              additionalProperties: false
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userType
+          in: path
+          description: cus = customer, ctr = contractor, adm = admin portal
+          schema:
+            type: string
+            enum: [cus, ctr, adm]
+            default: cus
+          required: true
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /signin/partner:
+    post:
+      tags:
+        - Signin
+      summary: API Partner
+      description: |-
+        ###### Request Field
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | apiKey | true | key for channel |
+      requestBody:
+        content: {}
+      security:
+        - apikeyAuth: []
+      responses:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            vary:
+              schema:
+                type: string
+                example: Origin
+            date:
+              schema:
+                type: string
+                example: Thu, 27 Jan 2022 06:40:50 GMT
+            content-length:
+              schema:
+                type: integer
+                example: "596"
+            x-envoy-upstream-service-time:
+              schema:
+                type: integer
+                example: "11"
+            server:
+              schema:
+                type: string
+                example: istio-envoy
+            Via:
+              schema:
+                type: string
+                example: 1.1 google
+            Alt-Svc:
+              schema:
+                type: string
+                example: clear
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+              example:
+                access_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njg3NDI1NjAsImlhdCI6MTY2ODY1NjE2MCwidXNlclVVSUQiOiJmMTc0NTkyNi03ZmMwLTNkNTktYmFmZS1kMTEyZDQzNjZjZjQiLCJ1c2VyVHlwZSI6ImFkbSIsImNvbnRlbnQiOnsiY2hhbm5lbFVVSUQiOiJiNTEyZmNkMC0xNDQyLTNhMTktYTRmOC0xOTIwZDMwYjg1NzgiLCJhZG1pblVVSUQiOiJmZDQ1ZTMwNy1hOTQ1LTMwM2MtYjMwNC1hNTJlODU2MGM2NjciLCJjaGFubmVsIjpbeyJ1dWlkIjoiYjUxMmZjZDAtMTQ0Mi0zYTE5LWE0ZjgtMTkyMGQzMGI4NTc4Iiwicm9sZXMiOlt7InV1aWQiOiJhN2Y2MTU0YS1lZDY1LTMxMWEtYjBlNS0yNDYwMWY4NmRkMzYiLCJuYW1lIjoiU3VwZXJBZG1pbiJ9XX1dLCJzdG9yZVVVSUQiOiIifSwic2Vzc2lvblVVSUQiOiI1ODg5NDg5Ni00NWNkLTM4YjItOWIzOS1kN2JlYWMyNTYwZTcifQ.XELp5c0-Le8-1G-Ab7zlghe64K-gROS9mYAsyupt7ZA
+                refresh_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NjkyNjA5NjAsImlhdCI6MTY2ODY1NjE2MCwidXNlclVVSUQiOiJmMTc0NTkyNi03ZmMwLTNkNTktYmFmZS1kMTEyZDQzNjZjZjQiLCJ1c2VyVHlwZSI6ImFkbSIsInNlc3Npb25VVUlEIjoiNTg4OTQ4OTYtNDVjZC0zOGIyLTliMzktZDdiZWFjMjU2MGU3In0.b7Q5E5T9NyN9zYwSMI-dpvV5MxBd5ev-UzbLdQUFkno
+        "500":
+          description: Internal Server Error
+          headers:
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            vary:
+              schema:
+                type: string
+                example: Origin
+            date:
+              schema:
+                type: string
+                example: Thu, 10 Nov 2022 05:02:37 GMT
+            content-length:
+              schema:
+                type: integer
+                example: "127"
+            x-envoy-upstream-service-time:
+              schema:
+                type: integer
+                example: "44"
+            server:
+              schema:
+                type: string
+                example: istio-envoy
+            Via:
+              schema:
+                type: string
+                example: 1.1 google
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: >-
+                  unable to get claim content: error calling admin service: rpc
+                  error: code = Unavailable desc = no healthy upstream
+  /v1/signin/token:
+    post:
+      tags:
+        - Signin
+      summary: Token Firebase
+      requestBody:
+        content: {}
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          example: password=123456; username=babe@qchang-auth.com
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /user-status:
+    get:
+      tags:
+        - Status
+      summary: Get User's status
+      description: |-
+        **Query param**
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | userPhone | true | User's phone number |
+        | userEmail | true | User's registered email |
+        | userFirstName | true | User's first name |
+        | userLastName | true | User's last name |
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userPhone
+          in: query
+          schema:
+            type: integer
+          required: true
+          description: User's phone number
+          example: >-
+            222222222
+        - name: userEmail
+          in: query
+          schema:
+            type: string
+          required: true
+          description: User's registered email
+          example: >-
+            noppawat.n@gmail.com
+        - name: userFirstName
+          in: query
+          schema:
+            type: string
+          required: true
+          description: User's first name
+          example: >-
+            test
+        - name: userLastName
+          in: query
+          schema:
+            type: string
+          required: true
+          description: User's last name
+          example: >-
+            test
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            Vary:
+              schema:
+                type: string
+                example: Origin
+            Date:
+              schema:
+                type: string
+                example: Mon, 23 May 2022 16:09:51 GMT
+            Content-Length:
+              schema:
+                type: integer
+                example: "229"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userFirstName:
+                    type: string
+                  userLastName:
+                    type: string
+                  userPhoneNo:
+                    type: string
+                  userEmail:
+                    type: string
+                  registeredBy:
+                    type: string
+                  status:
+                    type: string
+                  isPasswordSet:
+                    type: boolean
+                  lastLogin:
+                    type: string
+              example:
+                - userFirstName: test
+                  userLastName: test
+                  userPhoneNo: "0222222222"
+                  userEmail: noppawat.n@gmail.com
+                  registeredBy: google
+                  status: สมาชิกคิวช่าง
+                  isPasswordSet: false
+                  lastLogin: google
+  /user:
+    get:
+      tags:
+        - User Authen
+      summary: Switch User Key
+      description: |-
+        Switch User Line <-> cusUUID
+
+        ##### Use JWT Channel (Api key)
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | lineID | true | token from login firebase |
+        | cusUUID | true | customer UUID |
+
+        #### NOTE ** lineID or cusUUID required 1 parameter **
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filter
+          in: query
+          style: form
+          explode: true
+          schema:
+            oneOf:
+              - description: Use lineID
+                properties:
+                  lineID:
+                    type: string
+                required:
+                  - lineID
+                example:
+                  lineID: >-
+                    Ua0244397160b3bfb5361ecb62bb5e258
+              - description: Use cusUUID
+                properties:
+                  cusUUID:
+                    type: string
+                required:
+                  - cusUUID
+                example:
+                  cusUUID: >-
+                    4d055003-a589-3a25-b954-899ae5c452b1
+      responses:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            vary:
+              schema:
+                type: string
+                example: Origin
+            date:
+              schema:
+                type: string
+                example: Wed, 02 Mar 2022 03:11:53 GMT
+            content-length:
+              schema:
+                type: integer
+                example: "51"
+            x-envoy-upstream-service-time:
+              schema:
+                type: integer
+                example: "3"
+            server:
+              schema:
+                type: string
+                example: istio-envoy
+            Via:
+              schema:
+                type: string
+                example: 1.1 google
+            Alt-Svc:
+              schema:
+                type: string
+                example: clear
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cusUUID:
+                    type: string
+                  lineID:
+                    type: string
+              examples:
+                example-0:
+                  summary: get cusUUID
+                  value:
+                    cusUUID: 4d055003-a589-3a25-b954-899ae5c452b1
+                example-1:
+                  summary: get line userID
+                  value:
+                    lineID: Uf653aa699d143f1709f1e08f147025d7
+  /user/merge:
+    post:
+      tags:
+        - User Authen
+      summary: Mapping firebase & Line
+      description: |-
+        ##### Use JWT Channel (Api key)
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | tokenLine | true | token from login firebase |
+        | tokenFirebase | true | token from login line |
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lineToken
+                - firebaseToken
+              properties:
+                lineToken:
+                  description: token from login firebase
+                  type: string
+                firebaseToken:
+                  description: token from login line
+                  type: string
+              example:
+                lineToken: >-
+                  eyJhbGciOiJSUzI1NiIsImtpZCI6IjM1MDZmMzc1MjI0N2ZjZjk0Y2JlNWQyZDZiNTlmYThhMmJhYjFlYzIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmlyLWRldmVsb3AtYzBmOWMiLCJhdWQiOiJmaXItZGV2ZWxvcC1jMGY5YyIsImF1dGhfdGltZSI6MTY0MjA2MjQwMywidXNlcl9pZCI6ImlDMjZ4YjhEZnVnZkszSWpmTk1veHNaY2ZUNTMiLCJzdWIiOiJpQzI2eGI4RGZ1Z2ZLM0lqZk5Nb3hzWmNmVDUzIiwiaWF0IjoxNjQyMDYyNDAzLCJleHAiOjE2NDIwNjYwMDMsImVtYWlsIjoidGVzdG1haWxAdGVzdGRldi5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidGVzdG1haWxAdGVzdGRldi5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.DjoxtRXAH4zpzYw0FI9vuk19PFTP2F-chcrayYbFZHCK8Lf5wcbffm4G2bY2HYYewGN3lIzT13liEgYuJpE17hcA75cVMiguRn86irK1xA9FtJdzvNAXa9N6kJVds7t2Awp_tfddV6f1qUXUcxNGPoATNiXNsIDGX-nebI1zdxUhmq24ZBSmH6Z_FyIjrAPnXqVmFd1ikAEa-_2ClIE8fRd8pqxrGTTkcNGqufa1IA8hsron2WK9uYONCHVcj2xQr8UsUT9Z26es9suwUwg6yXwAMuz987LbATktYyI3gPI1E7JxWCLDjsTjUCzJnpMy53exLW2WxirLXbIYxM2L4g
+                firebaseToken: >-
+                  eyJhbGciOiJSUzI1NiIsImtpZCI6IjM1MDZmMzc1MjI0N2ZjZjk0Y2JlNWQyZDZiNTlmYThhMmJhYjFlYzIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmlyLWRldmVsb3AtYzBmOWMiLCJhdWQiOiJmaXItZGV2ZWxvcC1jMGY5YyIsImF1dGhfdGltZSI6MTY0MjA2MjQwMywidXNlcl9pZCI6ImlDMjZ4YjhEZnVnZkszSWpmTk1veHNaY2ZUNTMiLCJzdWIiOiJpQzI2eGI4RGZ1Z2ZLM0lqZk5Nb3hzWmNmVDUzIiwiaWF0IjoxNjQyMDYyNDAzLCJleHAiOjE2NDIwNjYwMDMsImVtYWlsIjoidGVzdG1haWxAdGVzdGRldi5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidGVzdG1haWxAdGVzdGRldi5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.DjoxtRXAH4zpzYw0FI9vuk19PFTP2F-chcrayYbFZHCK8Lf5wcbffm4G2bY2HYYewGN3lIzT13liEgYuJpE17hcA75cVMiguRn86irK1xA9FtJdzvNAXa9N6kJVds7t2Awp_tfddV6f1qUXUcxNGPoATNiXNsIDGX-nebI1zdxUhmq24ZBSmH6Z_FyIjrAPnXqVmFd1ikAEa-_2ClIE8fRd8pqxrGTTkcNGqufa1IA8hsron2WK9uYONCHVcj2xQr8UsUT9Z26es9suwUwg6yXwAMuz987LbATktYyI3gPI1E7JxWCLDjsTjUCzJnpMy53exLW2WxirLXbIYxM2L4g
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /user/profile:
+    patch:
+      tags:
+        - User Authen
+      summary: Update Profile
+      description: |-
+        ##### Use JWT Channel (Api key)
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | tokenLine | true | token from login firebase |
+        | tokenFirebase | true | token from login line |
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userUUID
+                - prefixID
+                - genderID
+                - userFirstName
+                - userLastName
+                - userEmail
+                - countryCode
+                - userPhoneSecNo
+                - dateOfBirth
+                - userIDCard
+              properties:
+                userUUID:
+                  type: string
+                prefixID:
+                  type: integer
+                genderID:
+                  type: integer
+                userFirstName:
+                  type: string
+                userLastName:
+                  type: string
+                userEmail:
+                  type: string
+                countryCode:
+                  type: string
+                userPhoneSecNo:
+                  type: string
+                dateOfBirth:
+                  type: string
+                userIDCard:
+                  type: string
+              example:
+                userUUID: 2024f290-1181-3fd7-8c02-9f01c3bfbb71
+                prefixID: 1
+                genderID: 2
+                userFirstName: ทดสอบ1
+                userLastName: ทดสอบ2
+                userEmail: testmail123@testdev.com
+                countryCode: "66"
+                userPhoneSecNo: "098882222"
+                dateOfBirth: "2021-07-13T00:00:00+07:00"
+                userIDCard: "1111111111111"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /user/reset-password:
+    post:
+      tags:
+        - User Authen
+      summary: Reset password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - password
+              properties:
+                phone:
+                  type: string
+                password:
+                  type: string
+              example:
+                phone: "0909182999"
+                password: NewPassword
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            Vary:
+              schema:
+                type: string
+                example: Origin
+            Date:
+              schema:
+                type: string
+                example: Mon, 20 Jun 2022 10:01:12 GMT
+            Content-Length:
+              schema:
+                type: integer
+                example: "22"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: success
+  /logout:
+    post:
+      tags:
+        - Revoke Token
+      summary: Logout
+      description: |-
+        ###### Request Field
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | apiKey | true | key for channel |
+
+        Request json body
+
+        | **Field** | **Required** | **Description** |
+        | --- | --- | --- |
+        | fcmToken | false | Firebase cloud messaging token (for uesrType ctr) |
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                registrationToken:
+                  type: string
+                  description: Firebase cloud messaging token (for uesrType ctr)
+              example:
+                registrationToken: >-
+                  cX2ZmKiT-k44gpI1J60eHy:APA91bEFoaSgI4o0sb5OLSWGDlBc-8jgYQKci7n8pWEr9ramUDVyQztIN3SmIkJjtRx6jJsdqo0wWkbgauSDWu2ElRyf2KnKYAN-9SDLKYFti6C5Ja0Ds269wWG78eQL7ILpcjhqIiJ5
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: x-qchang-buddy-platform
+          in: header
+          schema:
+            type: string
+          required: true
+          example: android
+      responses:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            vary:
+              schema:
+                type: string
+                example: Origin
+            date:
+              schema:
+                type: string
+                example: Thu, 27 Jan 2022 06:40:50 GMT
+            content-length:
+              schema:
+                type: integer
+                example: "596"
+            x-envoy-upstream-service-time:
+              schema:
+                type: integer
+                example: "11"
+            server:
+              schema:
+                type: string
+                example: istio-envoy
+            Via:
+              schema:
+                type: string
+                example: 1.1 google
+            Alt-Svc:
+              schema:
+                type: string
+                example: clear
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+              example:
+                access_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDMzNTIwNTAsImlhdCI6MTY0MzI2NTY1MCwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSIsImNvbnRlbnQiOnsiY2hhbm5lbFVVSUQiOiJiNTEyZmNkMC0xNDQyLTNhMTktYTRmOC0xOTIwZDMwYjg1NzgiLCJzdG9yZVVVSUQiOiIiLCJyb2xlIjpudWxsfX0.78VpRxZbeYvuEF_cd28A1t1R3xGvXMtGUpJ0cp-ZQgg
+                refresh_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDM4NzA0NTAsImlhdCI6MTY0MzI2NTY1MCwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSJ9.EqdWgV6Z930YY9sCvGZgno6iglc91Rm2ntzGZ8VKo28
+  /logout/force:
+    post:
+      tags:
+        - Revoke Token
+      summary: Force Logout
+      description: |-
+        ###### Request json body
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | ctrUUID | true | Contractor UUID |
+        | fcmToken | true | Firebase cloud messaging token |
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ctrUUID
+                - registrationToken
+              properties:
+                ctrUUID:
+                  type: string
+                  description: Contractor UUID
+                registrationToken:
+                  type: string
+                  description: Firebase cloud messaging token
+              example:
+                ctrUUID: fdfff9b7-a258-3c9a-a4cd-2e2a260a4bb0
+                registrationToken: >-
+                  cX2ZmKiT-k44gpI1J60eHy:APA91bEFoaSgI4o0sb5OLSWGDlBc-8jgYQKci7n8pWEr9ramUDVyQztIN3SmIkJjtRx6jJsdqo0wWkbgauSDWu2ElRyf2KnKYAN-9SDLKYFti6C5Ja0Ds269wWG78eQL7ILpcjhqIiJ5
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: x-qchang-buddy-platform
+          in: header
+          required: true
+          schema:
+            type: string
+          example: android
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            Vary:
+              schema:
+                type: string
+                example: Origin
+            Date:
+              schema:
+                type: string
+                example: Tue, 18 Oct 2022 02:27:53 GMT
+            Content-Length:
+              schema:
+                type: integer
+                example: "22"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: success
+  /revoke:
+    post:
+      tags:
+        - Revoke Token
+      summary: Revoke By Admin
+      description: |-
+        ###### Request Field
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | apiKey | true | key for channel |
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_uuid
+                - user_type
+              properties:
+                user_uuid:
+                  type: string
+                user_type:
+                  type: string
+              example:
+                user_uuid: 173526c7-8155-3993-ad88-d30d4ba90db8
+                user_type: adm
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=UTF-8
+            vary:
+              schema:
+                type: string
+                example: Origin
+            date:
+              schema:
+                type: string
+                example: Thu, 27 Jan 2022 06:40:50 GMT
+            content-length:
+              schema:
+                type: integer
+                example: "596"
+            x-envoy-upstream-service-time:
+              schema:
+                type: integer
+                example: "11"
+            server:
+              schema:
+                type: string
+                example: istio-envoy
+            Via:
+              schema:
+                type: string
+                example: 1.1 google
+            Alt-Svc:
+              schema:
+                type: string
+                example: clear
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+              example:
+                access_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDMzNTIwNTAsImlhdCI6MTY0MzI2NTY1MCwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSIsImNvbnRlbnQiOnsiY2hhbm5lbFVVSUQiOiJiNTEyZmNkMC0xNDQyLTNhMTktYTRmOC0xOTIwZDMwYjg1NzgiLCJzdG9yZVVVSUQiOiIiLCJyb2xlIjpudWxsfX0.78VpRxZbeYvuEF_cd28A1t1R3xGvXMtGUpJ0cp-ZQgg
+                refresh_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDM4NzA0NTAsImlhdCI6MTY0MzI2NTY1MCwidXNlclVVSUQiOiJlZmI0MzlhMy01ZWRmLTMwMmQtYjEwYi1hYTEyMjkwMmQ5ZDYiLCJ1c2VyVHlwZSI6ImFkbSJ9.EqdWgV6Z930YY9sCvGZgno6iglc91Rm2ntzGZ8VKo28
+  /health:
+    get:
+      tags:
+        - default
+      summary: Health
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /test-api:
+    post:
+      tags:
+        - default
+      summary: Api Version
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - endPoint
+              properties:
+                endPoint:
+                  type: string
+              example:
+                endPoint: m-job.qchang-api.com/uuid
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /token/gen/{userType}:
+    post:
+      tags:
+        - default
+      summary: GenJWT
+      description: |-
+        ##### Use JWT Channel (Api key)
+
+        | **Field** | **required** | **Description** |
+        | --- | --- | --- |
+        | token_id | true | token from login firebase |
+
+        ##### userType
+
+        *   cus = customer
+        *   ctr = contractor
+        *   adm = admin portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userID
+              properties:
+                userID:
+                  type: string
+              example:
+                userID: 2635
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: apiKey
+          in: header
+          schema:
+            type: string
+          required: true
+          example: BackBone@2022
+        - name: userType
+          in: path
+          description: cus = customer, ctr = contractor, adm = admin portal
+          schema:
+            type: string
+            enum: [cus, ctr, adm]
+            default: adm
+          required: true
+          # default: adm
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
