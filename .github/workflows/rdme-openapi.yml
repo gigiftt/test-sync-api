@@ -17,7 +17,7 @@ jobs:
       - name: Check out repo 📚
         uses: actions/checkout@v3
 
-      - name: Run `openapi` command 🚀
+      - name: Run `openapi` command
         uses: readmeio/rdme@v8
         with:
           rdme: openapi result.yml --key=${{ secrets.README_API_KEY }} --id=64701d378ca874000b060fd6
