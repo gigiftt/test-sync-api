@@ -26,3 +26,8 @@ jobs:
         uses: readmeio/rdme@v8
         with:
           rdme: openapi api-with-examples.yaml --key=${{ secrets.README_API_KEY }} --id=64704af418aed4006c738a49
+
+      - name: Run `openapi` command
+        uses: readmeio/rdme@v8
+        with:
+          rdme: openapi petstore.yaml --key=${{ secrets.README_API_KEY }}
